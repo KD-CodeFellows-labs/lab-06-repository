@@ -40,7 +40,10 @@ app.get('/weather', (request, response) => {
   for (let i = 0; i < darkskyData.daily.data.length; i++) {
     let dailyData = darkskyData.daily.data[i];
     // console.log(darkskyData.daily.data[i]);
-    weatherData.push(new Weather(dailyData.summary, dailyData.time));
+    let epochTime = (dailyData.time*1000);
+    let d = new Date(epochTime);
+    let time = d.toUTCString();
+    weatherData.push(new Weather(dailyData.summary, time));
   }
   response.send(weatherData);
 });
