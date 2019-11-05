@@ -17,7 +17,7 @@ app.get('/cool', (request, response) => {
 });
 
 
-// http://localhost:3001/location?data=seattle
+// http://localhost:3000/location?data=seattle
 app.get('/location', (request, response) => {
   // send the users current location back to them
   const geoData = require('./data/geo.json');
@@ -31,6 +31,23 @@ function Location(city, geoData) {
   this.formatted_query = geoData.results[0].formatted_address;
   this.latitude = geoData.results[0].geometry.location.lat;
   this.longitude = geoData.results[0].geometry.location.lng;
+}
+
+app.get('/weather', (request, response) => {
+  // send the users current location back to them
+  const darkskyData = require('./data/darksky.json');
+  const weatherData = [];
+  for (let i = 0; i < darkskyData.daily.data.length; i++) {
+    let dailyData = darkskyData.daily.data[i];
+    // console.log(darkskyData.daily.data[i]);
+    weatherData.push(new Weather(dailyData.summary, dailyData.time));
+  }
+  response.send(weatherData);
+});
+
+function Weather(summary, time) {
+  this.summary = summary;
+  this.time = time;
 }
 
 app.listen(PORT, () => {
