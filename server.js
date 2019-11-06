@@ -17,13 +17,11 @@ app.use(cors());
 let location = {};
 
 // http://localhost:3000/location?data=seattle
-app.get('/location', locationHandler);
-app.get('/weather', weatherHandler);
-app.use('*', notFoundHandler);
-app.use(errorHandler);
 
 function locationHandler(request, response) {
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GoogleAPI}`;
+
+  // console.log(request.query.data)
 
   if (location[url]) {
     response.send(location[url]);
@@ -32,9 +30,9 @@ function locationHandler(request, response) {
     superagent.get(url)
       .then(data => {
         const geoData = data.body;
-        const locations = new Locations(request.query.data, geoData);
-        locations[url] = location;
-        response.send(location);
+        const newLocation = new Locations(request.query.data, geoData);
+        location[url] = newLocation;
+        response.send(newLocation);
       })
       .catch(() => {
         errorHandler('Error something isn\'t right!', request, response);
@@ -66,11 +64,14 @@ function Locations(query, geoData) {
 }
 
 
-
 function Weather(day) {
   this.summary = day.summary;
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 }
+
+app.listen(PORT, () => {
+  console.log(`listening on PORT ${PORT}`);
+});
 
 function notFoundHandler(request, response) {
   response.status(404).send('say what!!!');
@@ -79,5 +80,15 @@ function notFoundHandler(request, response) {
 function errorHandler(error, request, response) {
   response.status(500).send(error);
 }
+
+
+
+
+
+app.get('/location', locationHandler);
+app.get('/weather', weatherHandler);
+app.get('*', notFoundHandler);
+app.use(errorHandler);
+
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
